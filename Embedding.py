@@ -30,6 +30,27 @@ class UdfFunction:
         return [x[0] for x in pairs]
 
 
+def save_vectors(vectors, outputPath):
+    """
+    Save the item vectors to a file.
+
+    :param vectors: A dictionary where the key is the item_id and the value is the vector.
+    :param outputPath: The path to the output file where vectors will be saved.
+    """
+    # Ensure the output directory exists
+    outputDir = os.path.dirname(outputPath)
+    if not os.path.exists(outputDir):
+        os.makedirs(outputDir)
+
+    # Write the vectors to the file
+    with open(outputPath, 'w') as f:
+        for item_id, vector in vectors.items():
+            # Join all components of the vector into a space-separated string
+            vector_str = " ".join([str(emb) for emb in vector])
+            # Write the item_id and its vector to the file
+            f.write(item_id + ":" + vector_str + "\n")
+
+
 def processItemSequence(spark, rawSampleDataPath):
     # rating data
     ratingSamples = spark.read.format("csv").option("header", "true").load(rawSampleDataPath)
@@ -64,19 +85,13 @@ def embeddingLSH(spark, movieEmbMap):
     bucketModel.approxNearestNeighbors(movieEmbDF, sampleEmb, 5).show(truncate=False)
 
 
-def trainItem2vec(spark, samples, embLength, embOutputPath, saveToRedis, redisKeyPrefix):
+def trainItem2vec(spark, samples, embLength, outputPath, saveToRedis, redisKeyPrefix):
     word2vec = Word2Vec().setVectorSize(embLength).setWindowSize(5).setNumIterations(10)
     model = word2vec.fit(samples)
     
-    embOutputDir = '/'.join(embOutputPath.split('/')[:-1])
-    if not os.path.exists(embOutputDir):
-        os.makedirs(embOutputDir)
-        
-    with open(embOutputPath, 'w') as f:
-        for movie_id in model.getVectors():
-            vectors = " ".join([str(emb) for emb in model.getVectors()[movie_id]])
-            f.write(movie_id + ":" + vectors + "\n")
-    # embeddingLSH(spark, model.getVectors())
+    # Save the vectors to a file
+    save_vectors(model.getVectors(), outputPath)
+    
     return model
 
 

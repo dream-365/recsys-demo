@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie List</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .movie-item {
+            margin-bottom: 20px;
+        }
+        .movie-img {
+            height: 300px;
+            object-fit: cover;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+        .movie-title {
+            font-size: 1.2em;
+            margin-bottom: 10px; 
+	    color: #007bff;
+        }
+        .movie-detail {
+            margin-bottom: 8px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">Movie List</h1>
+        <div class="row">
+            {% for movie in movies %}
+            <div class="col-md-4">
+                <div class="card movie-item">
+		    <img src="{{ url_for('static', filename='images/' + str(movie.movie_id) + '.jpg') }}" alt="{{ movie.title }} cover" class="card-img-top movie-img">
+                    <div class="card-body">
+                        <h5 class="card-title movie-title">{{ movie.title }}</h5>
+                        <p class="card-text movie-detail"><strong>Genres:</strong> {{ movie.genres }}</p>
+                        <p class="card-text movie-detail"><strong>Rating:</strong> {{ movie.rating }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

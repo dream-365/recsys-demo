@@ -10,7 +10,7 @@
             margin-bottom: 20px;
         }
         .movie-img {
-            height: 300px;
+            height: 200px;
             object-fit: cover;
             border-bottom-left-radius: 8px;
             border-bottom-right-radius: 8px;
@@ -18,7 +18,7 @@
         .movie-title {
             font-size: 1.2em;
             margin-bottom: 10px; 
-	    color: #007bff;
+	        color: #007bff;
         }
         .movie-detail {
             margin-bottom: 8px;
@@ -31,9 +31,9 @@
         <h1 class="my-4">Movie List</h1>
         <div class="row">
             {% for movie in movies %}
-            <div class="col-md-4">
+            <div class="col-md-2">  <!-- 修改为 col-md-2 以便每行展示6个电影 -->
                 <div class="card movie-item">
-		    <img src="{{ url_for('static', filename='images/' + str(movie.movie_id) + '.jpg') }}" alt="{{ movie.title }} cover" class="card-img-top movie-img">
+                    <img src="{{ url_for('static', filename='images/' ~ movie.movie_id ~ '.jpg') }}" alt="{{ movie.title }} cover" class="card-img-top movie-img">
                     <div class="card-body">
                         <h5 class="card-title movie-title">{{ movie.title }}</h5>
                         <p class="card-text movie-detail"><strong>Genres:</strong> {{ movie.genres }}</p>

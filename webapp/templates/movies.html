@@ -28,9 +28,9 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="my-4">Movie List</h1>
+        <h1 class="my-4">看过的电影</h1>
         <div class="row">
-            {% for movie in movies %}
+            {% for movie in watched_movies %}
             <div class="col-md-2">  <!-- 修改为 col-md-2 以便每行展示6个电影 -->
                 <div class="card movie-item">
                     <img src="{{ url_for('static', filename='images/' ~ movie.movie_id ~ '.jpg') }}" alt="{{ movie.title }} cover" class="card-img-top movie-img">
@@ -42,6 +42,22 @@
                 </div>
             </div>
             {% endfor %}
+        
+        </div>
+        <h1 class="my-4">召回的电影集合</h1>
+        <div class="row">
+            {% for movie in retrival_movies %}
+            <div class="col-md-2">  <!-- 修改为 col-md-2 以便每行展示6个电影 -->
+                <div class="card movie-item">
+                    <img src="{{ url_for('static', filename='images/' ~ movie.movie_id ~ '.jpg') }}" alt="{{ movie.title }} cover" class="card-img-top movie-img">
+                    <div class="card-body">
+                        <h5 class="card-title movie-title">{{ movie.title }}</h5>
+                        <p class="card-text movie-detail"><strong>Genres:</strong> {{ movie.genres }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        
         </div>
     </div>
     

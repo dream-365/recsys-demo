@@ -19,7 +19,7 @@ user_embs = np.load("/app/model/user_embs.npy")
 user_id_idx = np.load("/app/model/user_id_idx.npy")
 movie_id_idx = np.load("/app/model/movie_id_idx.npy")
 
-embedding_dim = 64
+embedding_dim = 32
 
 # 构建user_id和embedding的KV
 user_id_emb_dict = {}
@@ -31,16 +31,17 @@ for index, value in enumerate(user_id_idx):
 faiss_index = faiss.IndexFlatIP(embedding_dim)
 faiss_index.add(item_embs)
 
-@app.route('/')
-def home():
+@app.route('/<user_id>')
+def home(user_id):
     tbl_ratting_movies = db.user_ratting_movies
     tbl_movies = db.movies
 
-    filter_user_id = 1024
-    json_str = tbl_ratting_movies[ tbl_ratting_movies['user_id'] == filter_user_id ]  \
-                .sample(n=N_MAX, random_state=42) \
-                .to_json(orient='records')
-    watched_movies = json.loads(json_str)
+    filter_user_id = int(user_id)
+    watched_movie_df = tbl_ratting_movies[ tbl_ratting_movies['user_id'] == filter_user_id ]
+    watched_movie_ids = watched_movie_df["movie_id"].values
+    watched_movie_df.sort_values(by='timestamp', ascending=False, inplace=True)
+    json_str = watched_movie_df.head(n=18).to_json(orient='records')
+    lastn_watched_movies = json.loads(json_str)
     
     user_emb_query = [ user_id_emb_dict[filter_user_id] ]
     D, I = faiss_index.search(np.ascontiguousarray(user_emb_query), TOP_N)
@@ -50,14 +51,27 @@ def home():
     for idx in search_idx_result:
         retrival_movie_ids.append(movie_id_idx[idx])
 
-    json_str = tbl_movies[tbl_movies['movie_id'].isin(retrival_movie_ids)]  \
+    # 将列表转换为集合
+    retrival_set = set(retrival_movie_ids)
+    watched_set = set(watched_movie_ids)
+
+    # 找到交集
+    intersection = retrival_set.intersection(watched_set)
+
+    # 从 retrival_movie_ids 中去除交集中的元素
+    result = retrival_set - intersection
+
+    # 转换回列表（如果需要的话）
+    result_movie_ids = list(result)
+
+    json_str = tbl_movies[tbl_movies['movie_id'].isin(result_movie_ids)]  \
                         .to_json(orient='records')
     
-    retrival_movies = json.loads(json_str)
+    result_movies = json.loads(json_str)
 
     return render_template('movies.html', 
-                           watched_movies=watched_movies, 
-                           retrival_movies=retrival_movies)
+                           watched_movies=lastn_watched_movies, 
+                           retrival_movies=result_movies)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
